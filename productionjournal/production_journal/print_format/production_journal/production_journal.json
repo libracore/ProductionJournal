@@ -1,0 +1,23 @@
+{
+ "align_labels_right": 0, 
+ "creation": "2018-04-09 16:32:40.687023", 
+ "css": "p {\n\ttext-transform: none;\n\tcolor: black;\n}\ntable.footer_table {\n\tbackground: url(\"/files/NeDoMa_Footer.PNG\");\n\tbackground-repeat: no-repeat;\n\tbackground-size: cover;\n\twidth: 100%;\n\tmargin-bottom: -6mm;\n}\n.print-format {\n\tmargin-left: 0mm;\n\tmargin-right: 0mm;\n}\n.print-heading {\n\tmargin-left: 15mm;\n\tmargin-right: 15mm;\n\tmargin-top: -15mm;\n\tborder-bottom: none;\n\tmargin-bottom: 0mm !important;\n\tpadding: 0mm;\n}\n#main_content {\n\tmargin-left: 15mm;\n\tmargin-right: 15mm;\n\tmargin-top: 0mm !important;\n}\n#placeholder_mwst {\n\tcolor: white !important;\n}\n.Payment_table {\n\tpadding: 0mm;\n}", 
+ "custom_format": 1, 
+ "disabled": 0, 
+ "doc_type": "Production Journal", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "html": "<!-- HEAD -->\n<div  id=\"header-html\" class=\"hidden-pdf\" > \n\t<div class=\"print-heading\">\n\t\t<table style=\"width: 100%; margin-bottom: 20px;\">\n\t\t\t<tr>\n\t\t\t\t<td style=\"width: 33%; text-align: left;  vertical-align: text-top;\" rowspan=\"2\"><img src=\"/files/headerlogo.png\" style=\"width: 135px !important; height: 149px; position: top;\"/></td>\n\t\t\t\t<td style=\"width: 33%; height:100px; vertical-align: bottom !important; text-align: left;\">\n\t\t\t\t\t<p><strong>Next Door Market\u00ae</strong><br>\n\t\t\t\t\t<font size=\"-2\">{{ _(\"a Forward Solutions GmbH brand\") }}</font><br>\n\t\t\t\t\tStalden 1, 4500 Solothurn</p>\n\t\t\t\t</td>\n\t\t\t\t<td style=\"width: 33%; height:100px; vertical-align: bottom !important; text-align: left;\">\n\t\t\t\t\t<p>Postaddresse:<br>\n\t\t\t\t\tPostfach 546, 4502 Solothurn</p>\n\t\t\t\t</td>\n\t\t\t</tr>\n\t\t\t<tr>\n\t\t\t\t<td></td>\n\t\t\t\t<td></td>\n\t\t\t</tr>\n\t\t</table>\n\t</div>\n</div>\n<table style=\"width: 100%; font-family: 'Open Sans', sans-serif;\">\n\t   <tr>\n\t\t<td style=\"width: 20%;\"><strong>{{ _(\"Production Journal\") }}</strong></td>\n\t\t<td style=\"width: 30%;\">{{ doc.name }} / {{ doc.p_o_item }}</td>\n\t\t<td style=\"width: 20%;\">{{ _(\"Produced on\") }}</td>\n\t\t{% set date = doc.produced_on.split(' ') %}\n\t\t<td style=\"width: 30%;\">{{ date[0] }}</td>\n\t   </tr>\n\t   <tr>\n\t\t<td style=\"width: 20%;\">{{ _(\"Batch No\") }}</td>\n\t\t<td style=\"width: 30%;\">{{ doc.batch_no or 'NA' }}</td>\n\t\t<td style=\"width: 20%;\">{{ _(\"Expiry Date\") }}</td>\n\t\t{% if doc.exp_date %}{% set date_exp = doc.exp_date.split(' ') %}{% endif %}\n\t\t<td style=\"width: 30%;\">{% if date_exp %}{{ date_exp[0] }}{% else %}NA{% endif %}</td>\n\t   </tr>\n\t</table>\n\t<p><br></p>\n\t<table style=\"width: 100%\">\n\t\t<tr style=\"border-top: solid black 1px; border-bottom: solid black 1px;\">\n\t\t\t<td style=\"width: 5%\">Pos.</td>\n\t\t\t<td style=\"width: 20%\">{{ _(\"Ingredient\") }}</td>\n\t\t\t<td style=\"width: 20%\">Batch</td>\n\t\t\t<td style=\"width: 15%\">{{ _(\"Expiry Date\") }}</td>\n\t\t\t<td style=\"width: 20%\">{{ _(\"Supplier\") }}</td>\n\t\t\t<td style=\"width: 20%\">{{ _(\"Remarks\") }}</td>\n\t\t</tr>\n\t\t{% for n in doc.item_own %}\n\t\t<tr>\n\t\t\t<td>{{ loop.index }}</td>\n\t\t\t<td>{{ n.item }}</td>\n\t\t\t<td>{{ n.batch or 'NA' }}</td>\n\t\t\t<td>{{ n.exp_date or 'NA' }}</td>\n\t\t\t<td>{{ n.supplier }}</td>\n\t\t\t<td>{{ n.remarks or 'NA' }}</td>\n\t\t</tr>\n\t\t{% endfor %}\n\t</table>\n\t\n<!-- FOOTER -->\n<div id=\"footer-html\" class=\"visible-pdf\">\n\t<center><p>Tel: +41 79 597 83 60 | mail@nextdoormarket.com | www.nextdoormarket.com</p></center>\n\t<table class=\"footer_table\">\n\t\t<tr>\n\t\t\t<td><p class=\"text-center small page-number visible-pdf\">Page <span class=\"page\"></span> of <span class=\"topage\"></span></p></td>\n\t\t</tr>\n\t</table>\n</div>", 
+ "idx": 0, 
+ "line_breaks": 0, 
+ "modified": "2018-04-09 16:33:44.234338", 
+ "modified_by": "Administrator", 
+ "module": "Production Journal", 
+ "name": "Production Journal", 
+ "owner": "Administrator", 
+ "print_format_builder": 1, 
+ "print_format_type": "Server", 
+ "show_section_headings": 0, 
+ "standard": "Yes"
+}
