@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include productionjournal *.css
+recursive-include productionjournal *.csv
+recursive-include productionjournal *.html
+recursive-include productionjournal *.ico
+recursive-include productionjournal *.js
+recursive-include productionjournal *.json
+recursive-include productionjournal *.md
+recursive-include productionjournal *.png
+recursive-include productionjournal *.py
+recursive-include productionjournal *.svg
+recursive-include productionjournal *.txt
+recursive-exclude productionjournal *.pyc
