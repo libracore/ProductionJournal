@@ -9,7 +9,7 @@ from frappe.model.document import Document
 
 class ProductionJournal(Document):
 	def onload(self):
-		if not self.docstatus == 1:
+		if self.docstatus == 0:
 			#general
 			ref_master_stock_entry = frappe.db.sql("SELECT name FROM `tabStock Entry` WHERE purpose='Manufacture' AND production_order='{0}'".format(self.production_order), as_dict=True)
 			if ref_master_stock_entry:
@@ -17,14 +17,22 @@ class ProductionJournal(Document):
 
 			if master_batch:
 				self.batch_no = master_batch[0].batch_no
-				self.exp_date = frappe.db.sql("SELECT expiry_date FROM`tabBatch` WHERE name='{0}'".format(master_batch[0].batch_no), as_dict=True)[0].expiry_date
+				master_exp_date = frappe.db.sql("SELECT expiry_date FROM`tabBatch` WHERE name='{0}'".format(master_batch[0].batch_no), as_dict=True)
+				if master_exp_date:
+					self.exp_date = master_exp_date[0].expiry_date
 
 			#item section
-			ref_stock_entry = frappe.db.sql("SELECT name FROM `tabStock Entry` WHERE `production_order`='{0}' AND `purpose`='Material Transfer for Manufacture'".format(self.production_order), as_dict=True)[0].name
+			_ref_stock_entry = frappe.db.sql("SELECT name FROM `tabStock Entry` WHERE `production_order`='{0}' AND `purpose`='Material Transfer for Manufacture'".format(self.production_order), as_dict=True)
+			if _ref_stock_entry:
+				ref_stock_entry = _ref_stock_entry[0].name
 			items = frappe.db.sql("SELECT item_code, batch_no FROM `tabStock Entry Detail` WHERE `parent`='{0}'".format(ref_stock_entry), as_dict=True)
 
 			for item in items:
-				exp_date = frappe.db.sql("SELECT expiry_date FROM `tabBatch` WHERE `name`='{0}'".format(item.batch_no), as_dict=True)[0].expiry_date
+				_exp_date = frappe.db.sql("SELECT expiry_date FROM `tabBatch` WHERE `name`='{0}'".format(item.batch_no), as_dict=True)
+				if _exp_date:
+					exp_date = _exp_date[0].expiry_date
+				else:
+					exp_date = ""
 				supplier_booking = frappe.db.sql("SELECT parent FROM `tabPurchase Receipt Item` WHERE item_code='{0}' AND batch_no='{1}'".format(item.item_code, item.batch_no), as_dict=True)
 
 				if supplier_booking:
@@ -40,7 +48,7 @@ class ProductionJournal(Document):
 						'item': item.item_code,
 						'batch': item.batch_no,
 						'exp_date': exp_date,
-						'supplier': "Own Production"
+						'supplier': ""
 					})
 
 			self.submit()
