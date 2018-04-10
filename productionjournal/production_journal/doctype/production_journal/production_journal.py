@@ -22,11 +22,17 @@ class ProductionJournal(Document):
 					self.exp_date = master_exp_date[0].expiry_date
 
 			#item section
-			ref_stock_entry = frappe.db.sql("SELECT name FROM `tabStock Entry` WHERE `production_order`='{0}' AND `purpose`='Material Transfer for Manufacture'".format(self.production_order), as_dict=True)[0].name
+			_ref_stock_entry = frappe.db.sql("SELECT name FROM `tabStock Entry` WHERE `production_order`='{0}' AND `purpose`='Material Transfer for Manufacture'".format(self.production_order), as_dict=True)
+			if _ref_stock_entry:
+				ref_stock_entry = _ref_stock_entry[0].name
 			items = frappe.db.sql("SELECT item_code, batch_no FROM `tabStock Entry Detail` WHERE `parent`='{0}'".format(ref_stock_entry), as_dict=True)
 
 			for item in items:
-				exp_date = frappe.db.sql("SELECT expiry_date FROM `tabBatch` WHERE `name`='{0}'".format(item.batch_no), as_dict=True)[0].expiry_date
+				_exp_date = frappe.db.sql("SELECT expiry_date FROM `tabBatch` WHERE `name`='{0}'".format(item.batch_no), as_dict=True)
+				if _exp_date:
+					exp_date = _exp_date[0].expiry_date
+				else:
+					exp_date = "NA"
 				supplier_booking = frappe.db.sql("SELECT parent FROM `tabPurchase Receipt Item` WHERE item_code='{0}' AND batch_no='{1}'".format(item.item_code, item.batch_no), as_dict=True)
 
 				if supplier_booking:
