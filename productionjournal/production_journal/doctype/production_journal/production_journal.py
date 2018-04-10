@@ -48,7 +48,7 @@ class ProductionJournal(Document):
 						'item': item.item_code,
 						'batch': item.batch_no,
 						'exp_date': exp_date,
-						'supplier': "Own Production"
+						'supplier': ""
 					})
 
 			self.submit()
