@@ -32,7 +32,7 @@ class ProductionJournal(Document):
 				if _exp_date:
 					exp_date = _exp_date[0].expiry_date
 				else:
-					exp_date = "NA"
+					exp_date = ""
 				supplier_booking = frappe.db.sql("SELECT parent FROM `tabPurchase Receipt Item` WHERE item_code='{0}' AND batch_no='{1}'".format(item.item_code, item.batch_no), as_dict=True)
 
 				if supplier_booking:
