@@ -19,6 +19,7 @@ class ProductionJournal(Document):
 
 def load_data(self):
 	#general
+	master_batch = False
 	ref_master_stock_entry = frappe.db.sql("SELECT name FROM `tabStock Entry` WHERE purpose='Manufacture' AND production_order='{0}'".format(self.production_order), as_dict=True)
 	if ref_master_stock_entry:
 		master_batch = frappe.db.sql("SELECT batch_no FROM`tabStock Entry Detail` WHERE parent='{0}' AND item_code='{1}'".format(ref_master_stock_entry[0].name, self.p_o_item), as_dict=True)
