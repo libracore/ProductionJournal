@@ -10,6 +10,10 @@ from frappe.model.document import Document
 class ProductionJournal(Document):
 	def onload(self):
 		if self.docstatus == 0:
+			if self.is_fetched == 1:
+				return
+			else:
+				self.is_fetched = 1
 			#general
 			ref_master_stock_entry = frappe.db.sql("SELECT name FROM `tabStock Entry` WHERE purpose='Manufacture' AND production_order='{0}'".format(self.production_order), as_dict=True)
 			if ref_master_stock_entry:
@@ -50,5 +54,3 @@ class ProductionJournal(Document):
 						'exp_date': exp_date,
 						'supplier': ""
 					})
-
-			self.submit()
