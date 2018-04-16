@@ -17,5 +17,14 @@ frappe.ui.form.on('Production Journal', {
 				});
 			});
 		}
+	},
+	onload: function(frm) {
+		cur_frm.set_query("production_order", function() {
+			return {
+				"filters": {
+					"status": "Completed"
+				}
+			};
+		});
 	}
 });
