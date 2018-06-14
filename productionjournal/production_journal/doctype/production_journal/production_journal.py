@@ -5,65 +5,73 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-#from six import iteritems
 
 class ProductionJournal(Document):
-	def onload(self):
-		if self.docstatus == 0:
-			if self.is_fetched == 1:
-				return
-			else:
-				self.is_fetched = 1
-
+	def before_save(self):
+		if self.get("__islocal"):
 			load_data(self)
-
+			
 def load_data(self):
-	#general
-	master_batch = False
-	ref_master_stock_entry = frappe.db.sql("SELECT name FROM `tabStock Entry` WHERE purpose='Manufacture' AND production_order='{0}'".format(self.production_order), as_dict=True)
-	if ref_master_stock_entry:
-		master_batch = frappe.db.sql("SELECT batch_no FROM`tabStock Entry Detail` WHERE parent='{0}' AND item_code='{1}'".format(ref_master_stock_entry[0].name, self.p_o_item), as_dict=True)
+	master_ste = get_master_stock_entry(self)
+	for mste in master_ste:
+		items = get_items_of_mste(mste.name)
+		expirys = {}
+		parents = {}
+		supplier = {}
+		for item in items:			
+			if item.item_code != self.p_o_item:
+				_expirys = get_expire(item.batch_no)
+				for exp in _expirys:
+					expirys[item.item_code] = exp.exp
+				parent_stes = get_parent_ste(item.batch_no)
+				for parent_ste in parent_stes:
+					parents[item.item_code] = parent_ste.parent
+				_suppliers = get_supplier(parents[item.item_code])
+				for _supplier in _suppliers:
+					supplier[item.item_code] = _supplier.supplier
+				add_item_to_row(self, item, expirys[item.item_code], supplier[item.item_code])
 
-	if master_batch:
-		self.batch_no = master_batch[0].batch_no
-		master_exp_date = frappe.db.sql("SELECT expiry_date FROM`tabBatch` WHERE name='{0}'".format(master_batch[0].batch_no), as_dict=True)
-		if master_exp_date:
-			self.exp_date = master_exp_date[0].expiry_date
+def get_master_stock_entry(self):
+	sql_query = """SELECT t1.name
+		FROM `tabStock Entry` AS t1
+		WHERE t1.production_order = '{0}'
+		AND t1.purpose = 'Manufacture'
+		AND t1.docstatus = '1'""".format(self.production_order)
+	master_ste = frappe.db.sql(sql_query, as_dict=True)
+	return master_ste
+	
+def get_items_of_mste(mste):
+	sql_query = """SELECT t1.item_code, t1.transfer_qty, t1.batch_no
+		FROM `tabStock Entry Detail` AS t1
+		WHERE t1.parent = '{0}'""".format(mste)
+	items = frappe.db.sql(sql_query, as_dict=True)
+	return items
+	
+def add_item_to_row(self, item, exp_date, supplier):
+	self.append('item_own', {
+		'item': item.item_code,
+		'batch': item.batch_no,
+		'exp_date': exp_date,
+		'supplier': supplier
+	})
 
-	#item section
-	_ref_stock_entry = frappe.db.sql("SELECT name FROM `tabStock Entry` WHERE `production_order`='{0}' AND `purpose`='Material Transfer for Manufacture'".format(self.production_order), as_dict=True)
-	if _ref_stock_entry:
-		ref_stock_entry = _ref_stock_entry[0].name
-	items = frappe.db.sql("SELECT item_code, batch_no FROM `tabStock Entry Detail` WHERE `parent`='{0}'".format(ref_stock_entry), as_dict=True)
-
-	for item in items:
-		_exp_date = frappe.db.sql("SELECT expiry_date FROM `tabBatch` WHERE `name`='{0}'".format(item.batch_no), as_dict=True)
-		if _exp_date:
-			exp_date = _exp_date[0].expiry_date
-		else:
-			exp_date = ""
-		supplier_booking = frappe.db.sql("SELECT parent FROM `tabPurchase Receipt Item` WHERE item_code='{0}' AND batch_no='{1}'".format(item.item_code, item.batch_no), as_dict=True)
-
-		if supplier_booking:
-			supplier = frappe.db.sql("SELECT supplier FROM `tabPurchase Receipt` WHERE name='{0}'".format(supplier_booking[0].parent), as_dict=True)[0].supplier
-			self.append('item_own', {
-				'item': item.item_code,
-				'batch': item.batch_no,
-				'exp_date': exp_date,
-				'supplier': supplier
-			})
-		else:
-			self.append('item_own', {
-				'item': item.item_code,
-				'batch': item.batch_no,
-				'exp_date': exp_date,
-				'supplier': ""
-			})
-
-@frappe.whitelist()
-def clear_data(name):
-	frappe.db.sql("DELETE FROM `tabProduction Journal Item Own` WHERE `parent`='{0}'".format(name))
-	doc = frappe.get_doc("Production Journal", name)
-	load_data(doc)
-	doc.save()
-	return True
+def get_expire(batch_no):
+	sql_query = """SELECT t1.expiry_date AS 'exp'
+		FROM `tabBatch` AS t1
+		WHERE t1.name = '{0}'""".format(batch_no)
+	exp = frappe.db.sql(sql_query, as_dict=True)
+	return exp
+	
+def get_parent_ste(batch_no):
+	sql_query = """SELECT t1.parent
+		FROM `tabPurchase Receipt Item` AS t1
+		WHERE t1.batch_no = '{0}'""".format(batch_no)
+	parent_ste = frappe.db.sql(sql_query, as_dict=True)
+	return parent_ste
+	
+def get_supplier(parent):
+	sql_query = """SELECT t1.supplier
+		FROM `tabPurchase Receipt` AS t1
+		WHERE t1.name = '{0}'""".format(parent)
+	parents = frappe.db.sql(sql_query, as_dict=True)
+	return parents
