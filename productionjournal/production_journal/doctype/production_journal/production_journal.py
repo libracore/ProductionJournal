@@ -26,10 +26,19 @@ def load_data(self):
 				parent_stes = get_parent_ste(item.batch_no)
 				for parent_ste in parent_stes:
 					parents[item.item_code] = parent_ste.parent
-				_suppliers = get_supplier(parents[item.item_code])
-				for _supplier in _suppliers:
-					supplier[item.item_code] = _supplier.supplier
-				add_item_to_row(self, item, expirys[item.item_code], supplier[item.item_code])
+				if item.item_code in parents:
+					_suppliers = get_supplier(parents[item.item_code])
+					for _supplier in _suppliers:
+						supplier[item.item_code] = _supplier.supplier
+					if item.item_code in expirys:
+						add_item_to_row(self, item, expirys[item.item_code], supplier[item.item_code])
+					else:
+						add_item_to_row_empty_exp(self, item, supplier[item.item_code])
+				else:
+					if item.item_code in expirys:
+						add_item_to_row_empty_supplier(self, item, expirys[item.item_code])
+					else:
+						add_item_to_row_empty_supplier_and_exp(self, item)
 
 def get_master_stock_entry(self):
 	sql_query = """SELECT t1.name
@@ -53,6 +62,26 @@ def add_item_to_row(self, item, exp_date, supplier):
 		'batch': item.batch_no,
 		'exp_date': exp_date,
 		'supplier': supplier
+	})
+	
+def add_item_to_row_empty_supplier(self, item, exp_date):
+	self.append('item_own', {
+		'item': item.item_code,
+		'batch': item.batch_no,
+		'exp_date': exp_date
+	})
+	
+def add_item_to_row_empty_exp(self, item, supplier):
+	self.append('item_own', {
+		'item': item.item_code,
+		'batch': item.batch_no,
+		'supplier': supplier
+	})
+	
+def add_item_to_row_empty_supplier_and_exp(self, item):
+	self.append('item_own', {
+		'item': item.item_code,
+		'batch': item.batch_no
 	})
 
 def get_expire(batch_no):
