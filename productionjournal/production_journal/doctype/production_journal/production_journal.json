@@ -448,11 +448,11 @@
  "idx": 0, 
  "image_view": 0, 
  "in_create": 0, 
- "is_submittable": 1, 
+ "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-04-16 10:27:16.346082", 
+ "modified": "2018-06-14 16:24:36.958299", 
  "modified_by": "Administrator", 
  "module": "Production Journal", 
  "name": "Production Journal", 
@@ -462,7 +462,7 @@
   {
    "amend": 0, 
    "apply_user_permissions": 0, 
-   "cancel": 1, 
+   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -476,7 +476,7 @@
    "role": "System Manager", 
    "set_user_permissions": 0, 
    "share": 1, 
-   "submit": 1, 
+   "submit": 0, 
    "write": 1
   }
  ], 
