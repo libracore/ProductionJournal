@@ -10,7 +10,45 @@ class ProductionJournal(Document):
 	def before_save(self):
 		if self.get("__islocal"):
 			load_data(self)
-			
+			set_barcode(self)
+
+
+def set_barcode(self):
+	gtin = "0764018344"
+	
+	_product_code = self.p_o_item if self.p_o_item else 0
+	product_code = str(_product_code).zfill(3)
+	
+	_barcode = addCheckDigit((gtin + product_code))
+	
+	lot_number = self.batch_no if self.batch_no else 0
+	
+	_expiry_date = {}
+	exp_dates = get_expire(self.batch_no)
+	for exp_date in exp_dates:
+		_expiry_date["exp"] = str(exp_date.exp)
+	if "exp" in _expiry_date:
+		if _expiry_date["exp"] == None:
+			expiry_date = "991231"
+		else:
+			expiry_date = _expiry_date["exp"]
+	else:
+		expiry_date = "2099-12-31"
+	
+	barcode = "(01){0}(10){1}(17){2}{3}{4}".format(_barcode, lot_number, expiry_date[2:4], expiry_date[5:7], expiry_date[8:10])
+	self.barcode = barcode
+
+def addCheckDigit(barcode):
+	if len(barcode) in (7,11,12,13) and barcode.isdigit():
+		digits = map(int, barcode)
+		return barcode + str(__checkDigit(digits))
+	return ''
+
+def __checkDigit(digits):
+	total = sum(digits) + sum(map(lambda d: d*2, digits[-1::-2]))
+	return (10 - (total % 10)) % 10
+
+
 def load_data(self):
 	master_ste = get_master_stock_entry(self)
 	for mste in master_ste:
@@ -39,6 +77,8 @@ def load_data(self):
 						add_item_to_row_empty_supplier(self, item, expirys[item.item_code])
 					else:
 						add_item_to_row_empty_supplier_and_exp(self, item)
+			else:
+				self.batch_no = item.batch_no
 
 def get_master_stock_entry(self):
 	sql_query = """SELECT t1.name
